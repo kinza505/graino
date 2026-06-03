@@ -1,0 +1,94 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const nodemailer = require("nodemailer");
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// ================= MONGODB =================
+mongoose.connect(
+  "mongodb://kinzabilal9t_db_user:hJHU3VFLHa6HGLXq@ac-2ko06du-shard-00-00.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-01.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-02.rtavwdd.mongodb.net:27017/?ssl=true&replicaSet=atlas-89sq2v-shard-0&authSource=admin&appName=Cluster0/graino"
+)
+.then(() => console.log("✅ MongoDB Connected"))
+.catch((err) => console.log("❌ MongoDB Error:", err.message));
+
+// ================= ORDER SCHEMA =================
+const orderSchema = new mongoose.Schema(
+  {
+    firstName: String,
+    lastName: String,
+    email: String,
+    phone: String,
+    country: String,
+    city: String,
+    streetAddress: String,
+    paymentMethod: String,
+    totalPrice: Number,
+  },
+  { timestamps: true }
+);
+
+const Order = mongoose.model("Order", orderSchema);
+
+// ================= EMAIL SETUP =================
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "YOUR_GMAIL@gmail.com",
+    pass: "YOUR_APP_PASSWORD",
+  },
+});
+
+// ================= CREATE ORDER =================
+app.post("/api/orders", async (req, res) => {
+  try {
+    console.log("📩 BODY:", req.body);
+
+    const order = new Order(req.body);
+    const savedOrder = await order.save();
+
+    await transporter.sendMail({
+      from: "Graino Store <YOUR_GMAIL@gmail.com>",
+      to: req.body.email,
+      subject: "Order Confirmed 🎉",
+      html: `
+        <h2>Thank you ${req.body.firstName}</h2>
+        <p>Your order is confirmed.</p>
+        <p><b>Total:</b> Rs ${req.body.totalPrice}</p>
+      `,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      data: savedOrder,
+    });
+  } catch (error) {
+    console.log("❌ ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// ================= GET ORDERS =================
+app.get("/api/orders", async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ================= SERVER =================
+const PORT = 5001;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
