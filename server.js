@@ -18,12 +18,35 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 //   .then(() => console.log("✅ MongoDB Connected to grano_db"))
 //   .catch((err) => console.error("❌ DB Error:", err));
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ DB Error:", err));
+// 1. export ki jagah module.exports use karo
+const connectDB = async () => {
+  if (isConnected) return;
 
-  console.log("MONGO_URI:", process.env.MONGO_URI);
+  try {
+    const db = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    isConnected = db.connections[0].readyState === 1;
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    console.error("❌ DB Error:", err);
+    throw err;
+  }
+};
+
+// 2. App start hone se pehle connectDB() call karo
+app.listen(PORT, async () => {
+  await connectDB(); // ← Yeh add karo
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+// mongoose
+//   .connect(process.env.MONGO_URI)
+//   .then(() => console.log("✅ MongoDB Connected"))
+//   .catch((err) => console.error("❌ DB Error:", err));
+
+//   console.log("MONGO_URI:", process.env.MONGO_URI);
 
 const orderSchema = new mongoose.Schema(
   {
