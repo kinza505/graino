@@ -13,10 +13,17 @@ const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI;
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// mongoose
+//   .connect("mongodb://kinzabilal9t_db_user:hJHU3VFLHa6HGLXq@ac-2ko06du-shard-00-00.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-01.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-02.rtavwdd.mongodb.net:27017/graino?ssl=true&replicaSet=atlas-89sq2v-shard-0&authSource=admin&appName=Cluster0")
+//   .then(() => console.log("✅ MongoDB Connected to grano_db"))
+//   .catch((err) => console.error("❌ DB Error:", err));
+
 mongoose
-  .connect("mongodb://kinzabilal9t_db_user:hJHU3VFLHa6HGLXq@ac-2ko06du-shard-00-00.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-01.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-02.rtavwdd.mongodb.net:27017/graino?ssl=true&replicaSet=atlas-89sq2v-shard-0&authSource=admin&appName=Cluster0")
-  .then(() => console.log("✅ MongoDB Connected to grano_db"))
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ DB Error:", err));
+
+  console.log("MONGO_URI:", process.env.MONGO_URI);
 
 const orderSchema = new mongoose.Schema(
   {
