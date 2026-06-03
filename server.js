@@ -13,27 +13,29 @@ const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI;
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-mongoose
-  .connect("mongodb://kinzabilal9t_db_user:hJHU3VFLHa6HGLXq@ac-2ko06du-shard-00-00.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-01.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-02.rtavwdd.mongodb.net:27017/graino?ssl=true&replicaSet=atlas-89sq2v-shard-0&authSource=admin&appName=Cluster0")
-  .then(() => console.log("✅ MongoDB Connected to grano_db"))
-  .catch((err) => console.error("❌ DB Error:", err));
+// mongoose
+//   .connect("mongodb://kinzabilal9t_db_user:hJHU3VFLHa6HGLXq@ac-2ko06du-shard-00-00.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-01.rtavwdd.mongodb.net:27017,ac-2ko06du-shard-00-02.rtavwdd.mongodb.net:27017/graino?ssl=true&replicaSet=atlas-89sq2v-shard-0&authSource=admin&appName=Cluster0")
+//   .then(() => console.log("✅ MongoDB Connected to grano_db"))
+//   .catch((err) => console.error("❌ DB Error:", err));
 
-// 1. export ki jagah module.exports use karo
-// const connectDB = async () => {
-//   if (isConnected) return;
+// ✅ FIX 1: isConnected declare kiya
+let isConnected = false;
 
-//   try {
-//     const db = await mongoose.connect(process.env.MONGO_URI, {
-//       serverSelectionTimeoutMS: 5000,
-//       socketTimeoutMS: 45000,
-//     });
-//     isConnected = db.connections[0].readyState === 1;
-//     console.log("✅ MongoDB Connected");
-//   } catch (err) {
-//     console.error("❌ DB Error:", err);
-//     throw err;
-//   }
-// };
+const connectDB = async () => {
+  if (isConnected) return;
+
+  try {
+    const db = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+    isConnected = db.connections[0].readyState === 1;
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    console.error("❌ DB Error:", err);
+    throw err;
+  }
+};
 
 // // 2. App start hone se pehle connectDB() call karo
 // app.listen(PORT, async () => {
